@@ -18,25 +18,31 @@ namespace FetchData
 
         public ApiService(string baseEndpoint, int timeout = 60) : this(timeout)
         {
-            CheckBaseEndpoint(baseEndpoint);
             _baseEndpoint = baseEndpoint;
+            CheckBaseEndpoint(_baseEndpoint);
         }
 
         public T Initiated(string baseEndpoint = null)
         {
-            CheckBaseEndpoint(baseEndpoint);
+            if (baseEndpoint != null)
+                CheckBaseEndpoint(baseEndpoint);
+                
             return CreateClient(new RateLimitedHttpMessageHandler(new HttpLoggingHandler(), Priority.UserInitiated), baseEndpoint);
         }
 
         public T Background(string baseEndpoint = null)
         {
-            CheckBaseEndpoint(baseEndpoint);
+            if (baseEndpoint != null)
+                CheckBaseEndpoint(baseEndpoint);
+                
             return CreateClient(new RateLimitedHttpMessageHandler(new HttpLoggingHandler(), Priority.Background), baseEndpoint);
         }
 
         public T Speculative(string baseEndpoint = null)
         {
-            CheckBaseEndpoint(baseEndpoint);
+            if (baseEndpoint != null)
+                CheckBaseEndpoint(baseEndpoint);
+            
             return CreateClient(new RateLimitedHttpMessageHandler(new HttpLoggingHandler(), Priority.Speculative), baseEndpoint);
         }
 
