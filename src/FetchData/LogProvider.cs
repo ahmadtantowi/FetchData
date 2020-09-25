@@ -8,7 +8,7 @@ namespace FetchData
     public static class LogProvider
     {
         private static IDictionary<string, ILogger> _loggers = new Dictionary<string, ILogger>();
-        private static ILoggerFactory _loggerFactory = new LoggerFactory();
+        private static ILoggerFactory _loggerFactory;
     
         public static void SetLogFactory(ILoggerFactory factory)
         {
