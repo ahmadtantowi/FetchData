@@ -24,14 +24,15 @@ namespace FetchData.HttpTools
             _shortIdOptions = new GenerationOptions
             {
                 Length = 8,
-                UseNumbers = false
+                UseNumbers = false,
+                UseSpecialCharacters = false
             };
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var id = ShortId.Generate(_shortIdOptions);
-            var msg = $"{id} [REQ]";
+            var msg = $"[{id} Req]";
 
             _logger.LogInformation($"{msg} ========Start==========");
             _logger.LogInformation($"{msg} {request.Method} {request.RequestUri.PathAndQuery} {request.RequestUri.Scheme}/{request.Version}");
@@ -66,7 +67,7 @@ namespace FetchData.HttpTools
             _logger.LogInformation($"{msg} Duration: {end - start}");
             _logger.LogInformation($"{msg} ==========End==========");
 
-            msg = $"{id} [RSP]";
+            msg = $"[{id}-Res]";
             _logger.LogInformation($"{msg} =========Start=========");
 
             var resp = response;
