@@ -20,8 +20,10 @@ namespace FetchData.Example
             Console.WriteLine($"Get GitHub profile with username {username}");
             Console.WriteLine("Executing Fetch Data...");
 
-            var gitHubService = new ApiService<IGitHubService>("https://api.github.com");
-            _ = await gitHubService.Initiated().GetUser(username).ConfigureAwait(false);
+            var gitHubService = new ApiService<IGitHubService>(new ApiConfiguration("https://api.github.com"));
+            var initiatedResult = await (await gitHubService.Initiated.GetUser(username)).Content.ReadAsStringAsync();
+            var backgroundResult = await (await gitHubService.Background.GetUser(username)).Content.ReadAsStringAsync();
+            var speculativeResult = await (await gitHubService.Speculative.GetUser(username)).Content.ReadAsStringAsync();
         }
     }
 }
