@@ -4,81 +4,87 @@ using System.Text.Json;
 using FetchData.HttpTools;
 using FetchData.Serialization;
 using Fusillade;
+using Microsoft.Extensions.DependencyInjection;
 using Refit;
 
 namespace FetchData
 {
-    public class ApiService<T> : IApiService<T> where T : class
+    public class ApiService<T> : IApiService<T> 
+        where T : class
     {
+        public ApiConfiguration ApiConfig { get; set; }
+
+        public T Initiated => _initiated.Value;
+        public T Background => _background.Value;
+        public T Speculative => _speculative.Value;
+        
+        private readonly Lazy<T> _initiated;
+        private readonly Lazy<T> _background;
+        private readonly Lazy<T> _speculative;
         private readonly RefitSettings _refitSettings;
-        private readonly TimeSpan _timeout;
-        private readonly string _baseEndpoint;
 
-        public ApiService(int timeout = 60)
-        {
-            _timeout = TimeSpan.FromSeconds(timeout);
-        }
+        public ApiService(ApiConfiguration apiConfig)
+            : this(apiConfig, null, null) {}
 
-        public ApiService(string baseEndpoint, int timeout = 60) : this(timeout)
-        {
-            _baseEndpoint = baseEndpoint;
-            CheckBaseEndpoint(_baseEndpoint);
-        }
+        public ApiService(ApiConfiguration apiConfig, IServiceProvider provider)
+            : this(apiConfig, provider, null) {}
 
-        public ApiService(string baseEndpoint, SerializeNamingProperty serializeName, int timeout = 60) : this(baseEndpoint, timeout)
+        public ApiService(ApiConfiguration apiConfig, IServiceProvider provider, Type handler)
         {
+            _initiated = new Lazy<T>(() => CreateClient(
+                new RateLimitedHttpMessageHandler(
+                    provider is null 
+                        ? new HttpLoggingHandler()
+                        : handler is null 
+                            ? provider.GetService<HttpLoggingHandler>()
+                            : provider.GetService(handler) as DelegatingHandler,
+                    Priority.UserInitiated
+                )
+            ));
+            _background = new Lazy<T>(() => CreateClient(
+                new RateLimitedHttpMessageHandler(
+                    provider is null 
+                        ? new HttpLoggingHandler()
+                        : handler is null 
+                            ? provider.GetService<HttpLoggingHandler>()
+                            : provider.GetService(handler) as DelegatingHandler,
+                    Priority.Background
+                )
+            ));
+            _speculative = new Lazy<T>(() => CreateClient(
+                new RateLimitedHttpMessageHandler(
+                    provider is null 
+                        ? new HttpLoggingHandler()
+                        : handler is null 
+                            ? provider.GetService<HttpLoggingHandler>()
+                            : provider.GetService(handler) as DelegatingHandler,
+                    Priority.Speculative
+                )
+            ));
             _refitSettings = new RefitSettings(new SystemTextJsonContentSerializer(new JsonSerializerOptions
             {
-                PropertyNamingPolicy = serializeName switch
+                PropertyNamingPolicy = apiConfig.SerializeMode switch
                 {
                     SerializeNamingProperty.CamelCase => JsonNamingPolicy.CamelCase,
                     SerializeNamingProperty.SnakeCase => JsonSnakeCaseNamingPolicy.Instance,
                     _ => null
                 }
             }));
+
+            ApiConfig = apiConfig;
         }
 
-        public T Initiated(string baseEndpoint = null)
-        {
-            if (baseEndpoint != null)
-                CheckBaseEndpoint(baseEndpoint);
-                
-            return CreateClient(new RateLimitedHttpMessageHandler(new HttpLoggingHandler(), Priority.UserInitiated), baseEndpoint);
-        }
-
-        public T Background(string baseEndpoint = null)
-        {
-            if (baseEndpoint != null)
-                CheckBaseEndpoint(baseEndpoint);
-                
-            return CreateClient(new RateLimitedHttpMessageHandler(new HttpLoggingHandler(), Priority.Background), baseEndpoint);
-        }
-
-        public T Speculative(string baseEndpoint = null)
-        {
-            if (baseEndpoint != null)
-                CheckBaseEndpoint(baseEndpoint);
-            
-            return CreateClient(new RateLimitedHttpMessageHandler(new HttpLoggingHandler(), Priority.Speculative), baseEndpoint);
-        }
-
-        private T CreateClient(HttpMessageHandler messageHandler, string baseEndpoint)
+        private T CreateClient(HttpMessageHandler messageHandler)
         {
             var client = new HttpClient(messageHandler)
             {
-                BaseAddress = new Uri(baseEndpoint ?? _baseEndpoint ?? throw new InvalidOperationException("Base endpoint not provided")),
-                Timeout = _timeout
+                BaseAddress = new Uri(ApiConfig.Host ?? throw new InvalidOperationException("Host services not provided")),
+                Timeout = TimeSpan.FromSeconds(ApiConfig.Timeout)
             };
 
             return _refitSettings is null
                 ? RestService.For<T>(client)
                 : RestService.For<T>(client, _refitSettings);
-        }
-
-        private void CheckBaseEndpoint(string baseEndpoint)
-        {
-            if (!Uri.IsWellFormedUriString(baseEndpoint, UriKind.Absolute))
-                throw new ArgumentException("Base endpoint is not correct");
         }
     }
 }
