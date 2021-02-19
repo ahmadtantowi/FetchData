@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FetchData.Extensions
 {
-    public static class FetchDataServiceProviderExtension
+    public static class LoggerFactoryExtension
     {
         public static ILoggerFactory SetFetchDataLoggerFactory(this ILoggerFactory loggerFactory)
         {
