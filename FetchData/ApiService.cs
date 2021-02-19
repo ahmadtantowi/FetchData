@@ -1,6 +1,8 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Threading;
 using FetchData.HttpTools;
 using FetchData.Serialization;
 using Fusillade;
@@ -81,6 +83,9 @@ namespace FetchData
                 BaseAddress = new Uri(ApiConfig.Host ?? throw new InvalidOperationException("Host services not provided")),
                 Timeout = TimeSpan.FromSeconds(ApiConfig.Timeout)
             };
+
+            if (client.DefaultRequestHeaders.AcceptLanguage.Count == 0)
+                client.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue(Thread.CurrentThread.CurrentCulture.Name));
 
             return _refitSettings is null
                 ? RestService.For<T>(client)
