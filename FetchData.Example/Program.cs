@@ -1,7 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using FetchData.Example.Services;
 using FetchData.Extensions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace FetchData.Example
@@ -10,8 +13,31 @@ namespace FetchData.Example
     {
         static async Task Main(string[] args)
         {
-            LoggerFactory
-                .Create(builder => builder.AddConsole())
+            // LoggerFactory
+            //     .Create(builder => builder.AddConsole())
+            //     .SetFetchDataLoggerFactory();
+            
+            // read appsetting.json file
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+            var githubConf = builder.GetSection("GitHubService").Get<ApiConfiguration>();
+            var githubServiceConf = new ApiServiceConfiguration
+            {
+                Configuration = githubConf,
+                Modules = new[] { typeof(IGitHub) }
+            };
+
+            // setup dependency injection
+            var serviceProvider = new ServiceCollection()
+                .AddLogging()
+                .AddApiServices(githubServiceConf)
+                .BuildServiceProvider();
+            
+            // configure console logging
+            serviceProvider
+                .GetService<ILoggerFactory>()
                 .SetFetchDataLoggerFactory();
 
             Console.Write("Input GitHub username: ");
@@ -20,10 +46,10 @@ namespace FetchData.Example
             Console.WriteLine($"Get GitHub profile with username {username}");
             Console.WriteLine("Executing Fetch Data...");
 
-            var gitHubService = new ApiService<IGitHubService>(new ApiConfiguration("https://api.github.com"));
-            var initiatedResult = await (await gitHubService.Initiated.GetUser(username)).Content.ReadAsStringAsync();
-            var backgroundResult = await (await gitHubService.Background.GetUser(username)).Content.ReadAsStringAsync();
-            var speculativeResult = await (await gitHubService.Speculative.GetUser(username)).Content.ReadAsStringAsync();
+            var githubService = serviceProvider.GetService<IApiService<IGitHubApi>>();
+            var initiatedResult = await (await githubService.Initiated.GetUser(username)).Content.ReadAsStringAsync();
+            var backgroundResult = await (await githubService.Background.GetUser(username)).Content.ReadAsStringAsync();
+            var speculativeResult = await (await githubService.Speculative.GetUser(username)).Content.ReadAsStringAsync();
         }
     }
 }
