@@ -6,7 +6,7 @@ using Refit;
 namespace FetchData.Example.Services
 {
     [Headers("User-Agent: FetchData-Example")]
-    public interface IGitHubService
+    public interface IGitHubApi : IGitHub
     {
         [Get("/users/{username}")]
         Task<HttpResponseMessage> GetUser(string username);
