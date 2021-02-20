@@ -33,33 +33,25 @@ namespace FetchData
 
         public ApiService(ApiConfiguration apiConfig, IServiceProvider provider, Type handler)
         {
+            var providedHandler = handler is null 
+                ? provider.GetService<HttpLoggingHandler>()
+                : provider.GetService(handler) as DelegatingHandler;
+            
             _initiated = new Lazy<T>(() => CreateClient(
                 new RateLimitedHttpMessageHandler(
-                    provider is null 
-                        ? new HttpLoggingHandler()
-                        : handler is null 
-                            ? provider.GetService<HttpLoggingHandler>()
-                            : provider.GetService(handler) as DelegatingHandler,
+                    provider is null ? new HttpLoggingHandler() : providedHandler,
                     Priority.UserInitiated
                 )
             ));
             _background = new Lazy<T>(() => CreateClient(
                 new RateLimitedHttpMessageHandler(
-                    provider is null 
-                        ? new HttpLoggingHandler()
-                        : handler is null 
-                            ? provider.GetService<HttpLoggingHandler>()
-                            : provider.GetService(handler) as DelegatingHandler,
+                    provider is null ? new HttpLoggingHandler() : providedHandler,
                     Priority.Background
                 )
             ));
             _speculative = new Lazy<T>(() => CreateClient(
                 new RateLimitedHttpMessageHandler(
-                    provider is null 
-                        ? new HttpLoggingHandler()
-                        : handler is null 
-                            ? provider.GetService<HttpLoggingHandler>()
-                            : provider.GetService(handler) as DelegatingHandler,
+                    provider is null ? new HttpLoggingHandler() : providedHandler,
                     Priority.Speculative
                 )
             ));
