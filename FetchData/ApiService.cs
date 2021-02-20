@@ -33,28 +33,20 @@ namespace FetchData
 
         public ApiService(ApiConfiguration apiConfig, IServiceProvider provider, Type handler)
         {
-            var providedHandler = handler is null 
-                ? provider.GetService<HttpLoggingHandler>()
-                : provider.GetService(handler) as DelegatingHandler;
+            var providedHandler = provider is null
+                // provide handler without using IServiceProvider
+                ? handler is null
+                    ? new HttpLoggingHandler()
+                    : Activator.CreateInstance(handler) as DelegatingHandler
+                // get handler from IServiceProvider
+                : handler is null 
+                    ? provider.GetService<HttpLoggingHandler>()
+                    : provider.GetService(handler) as DelegatingHandler;
             
-            _initiated = new Lazy<T>(() => CreateClient(
-                new RateLimitedHttpMessageHandler(
-                    provider is null ? new HttpLoggingHandler() : providedHandler,
-                    Priority.UserInitiated
-                )
-            ));
-            _background = new Lazy<T>(() => CreateClient(
-                new RateLimitedHttpMessageHandler(
-                    provider is null ? new HttpLoggingHandler() : providedHandler,
-                    Priority.Background
-                )
-            ));
-            _speculative = new Lazy<T>(() => CreateClient(
-                new RateLimitedHttpMessageHandler(
-                    provider is null ? new HttpLoggingHandler() : providedHandler,
-                    Priority.Speculative
-                )
-            ));
+            _initiated = new Lazy<T>(() => CreateClient(new RateLimitedHttpMessageHandler(providedHandler, Priority.UserInitiated)));
+            _background = new Lazy<T>(() => CreateClient(new RateLimitedHttpMessageHandler(providedHandler, Priority.Background)));
+            _speculative = new Lazy<T>(() => CreateClient(new RateLimitedHttpMessageHandler(providedHandler, Priority.Speculative)));
+
             _refitSettings = new RefitSettings(new SystemTextJsonContentSerializer(new JsonSerializerOptions
             {
                 PropertyNamingPolicy = apiConfig.SerializeMode switch
