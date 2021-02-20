@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using FetchData.HttpTools;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FetchData.Extensions
@@ -9,10 +10,13 @@ namespace FetchData.Extensions
     {
         public static IServiceCollection AddApiServices(this IServiceCollection services, params ApiServiceConfiguration[] configs)
         {
+            services.AddTransient<HttpLoggingHandler>();
+            
             foreach (var api in configs)
             {
                 var allServices = Assembly
-                    .GetExecutingAssembly().GetTypes()
+                    .GetCallingAssembly()
+                    .GetTypes()
                     .Where(a => api.Modules.Any(m => m.IsAssignableFrom(a)) && a.IsInterface);
                 
                 foreach (var module in api.Modules)
@@ -26,7 +30,7 @@ namespace FetchData.Extensions
 
                         services.Add(new ServiceDescriptor(
                             iApiService, 
-                            provider => Activator.CreateInstance(apiService, api, provider, api.DelegatingHandler), 
+                            provider => Activator.CreateInstance(apiService, api.Configuration, provider, api.DelegatingHandler), 
                             ServiceLifetime.Transient));
                     }
                 }
