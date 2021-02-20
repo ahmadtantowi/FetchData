@@ -13,9 +13,10 @@ namespace FetchData.Example
     {
         static async Task Main(string[] args)
         {
-            // LoggerFactory
-            //     .Create(builder => builder.AddConsole())
-            //     .SetFetchDataLoggerFactory();
+            // configure console logging
+            LoggerFactory
+                .Create(builder => builder.AddConsole())
+                .SetFetchDataLoggerFactory();
             
             // read appsetting.json file
             var builder = new ConfigurationBuilder()
@@ -34,11 +35,6 @@ namespace FetchData.Example
                 .AddLogging()
                 .AddApiServices(githubServiceConf)
                 .BuildServiceProvider();
-            
-            // configure console logging
-            serviceProvider
-                .GetService<ILoggerFactory>()
-                .SetFetchDataLoggerFactory();
 
             Console.Write("Input GitHub username: ");
             var username = Console.ReadLine();
