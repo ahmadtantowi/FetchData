@@ -15,7 +15,7 @@ namespace FetchData.Example
         {
             // configure console logging
             LoggerFactory
-                .Create(builder => builder.AddConsole())
+                .Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Debug))
                 .SetFetchDataLoggerFactory();
             
             // read appsetting.json file
@@ -35,6 +35,9 @@ namespace FetchData.Example
                 .AddLogging()
                 .AddApiServices(githubServiceConf)
                 .BuildServiceProvider();
+
+            serviceProvider.GetService<ILoggerFactory>()
+                .CreateLogger<Program>();
 
             Console.Write("Input GitHub username: ");
             var username = Console.ReadLine();

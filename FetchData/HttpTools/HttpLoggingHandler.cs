@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using shortid;
 using shortid.Configuration;
 
@@ -14,90 +15,97 @@ namespace FetchData.HttpTools
     {
         private readonly string[] _types;
         private readonly ILogger _logger;
-        private readonly GenerationOptions _shortIdOptions;
 
-        public HttpLoggingHandler(HttpMessageHandler innerHandler = null)
+        public HttpLoggingHandler(HttpMessageHandler innerHandler = null) 
             : base(innerHandler ?? new HttpClientHandler())
-        {
+        { 
             _types = new[] { "html", "text", "xml", "json", "txt" };
             _logger = LogProvider.GetLogger(nameof(HttpLoggingHandler));
-            _shortIdOptions = new GenerationOptions
-            {
-                Length = 8,
-                UseNumbers = false,
-                UseSpecialCharacters = false
-            };
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var id = ShortId.Generate(_shortIdOptions);
-            var msg = $"[{id} Req]";
+            string id = default, msg = default;
+            DateTime start = default, end = default;
 
-            _logger.LogInformation($"{msg} ========Start==========");
-            _logger.LogInformation($"{msg} {request.Method} {request.RequestUri.PathAndQuery} {request.RequestUri.Scheme}/{request.Version}");
-            _logger.LogInformation($"{msg} Host: {request.RequestUri.Scheme}://{request.RequestUri.Host}");
-
-            foreach (var header in request.Headers)
+            if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogInformation($"{msg} {header.Key}: {string.Join(", ", header.Value)}");
-            }
-
-            if (request.Content != null)
-            {
-                foreach (var header in request.Content.Headers)
+                id = ShortId.Generate(new GenerationOptions
                 {
-                    _logger.LogInformation($"{msg} {header.Key}: {string.Join(", ", header.Value)}");
+                    Length = 8,
+                    UseSpecialCharacters = false
+                });
+                msg = $"[{id} Request]";
+
+                _logger.LogDebug("{0} ========Start==========", msg);
+                _logger.LogDebug("{0} {1} {2} {3}/{4}", msg, request.Method, request.RequestUri.PathAndQuery, request.RequestUri.Scheme, request.Version);
+                _logger.LogDebug("{0} Host: {1}://{2}", msg, request.RequestUri.Scheme, request.RequestUri.Host);
+
+                foreach (var header in request.Headers)
+                {
+                    _logger.LogDebug("{0} {1}: {2}", msg, header.Key, string.Join(", ", header.Value));
                 }
 
-                if (request.Content is StringContent || IsTextBasedContentType(request.Headers) || IsTextBasedContentType(request.Content.Headers))
+                if (request.Content != null)
                 {
-                    var result = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    foreach (var header in request.Content.Headers)
+                    {
+                        _logger.LogDebug("{0} {1}: {2}", msg, header.Key, string.Join(", ", header.Value));
+                    }
 
-                    _logger.LogInformation($"{msg} Content:");
-                    _logger.LogInformation($"{msg} {string.Join("", result.Cast<char>())}");
+                    if (request.Content is StringContent || IsTextBasedContentType(request.Headers) || IsTextBasedContentType(request.Content.Headers))
+                    {
+                        var result = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+                        _logger.LogDebug("{0} Content:", msg);
+                        _logger.LogDebug("{0} {1}", msg, string.Join(string.Empty, result.Cast<char>()));
+                    }
                 }
+
+                start = DateTime.Now;
             }
 
-            var start = DateTime.Now;
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            var end = DateTime.Now;
 
-            _logger.LogInformation($"{msg} Duration: {end - start}");
-            _logger.LogInformation($"{msg} ==========End==========");
-
-            msg = $"[{id}-Res]";
-            _logger.LogInformation($"{msg} =========Start=========");
-
-            var resp = response;
-
-            _logger.LogInformation($"{msg} {request.RequestUri.Scheme.ToUpper()}/{resp.Version} {(int)resp.StatusCode} {resp.ReasonPhrase}");
-
-            foreach (var header in resp.Headers)
+            if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogInformation($"{msg} {header.Key}: {string.Join(", ", header.Value)}");
-            }
+                end = DateTime.Now;
+                
+                _logger.LogDebug("{0} Duration: {1}", msg, end - start);
+                _logger.LogDebug("{0} ==========End==========", msg);
 
-            if (resp.Content != null)
-            {
-                foreach (var header in resp.Content.Headers)
+                msg = $"[{id} Response]";
+                _logger.LogDebug("{0} =========Start=========", msg);
+
+                var resp = response;
+
+                _logger.LogDebug("{0} {1}/{2} {3} {4}", msg, request.RequestUri.Scheme.ToUpper(), resp.Version, (int)resp.StatusCode, resp.ReasonPhrase);
+
+                foreach (var header in resp.Headers)
                 {
-                    _logger.LogInformation($"{msg} {header.Key}: {string.Join(", ", header.Value)}");
+                    _logger.LogDebug("{0} {1}: {2}", msg, header.Key, string.Join(", ", header.Value));
                 }
 
-                if (resp.Content is StringContent || IsTextBasedContentType(resp.Headers) || IsTextBasedContentType(resp.Content.Headers))
+                if (resp.Content != null)
                 {
-                    start = DateTime.Now;
-                    var result = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    end = DateTime.Now;
+                    foreach (var header in resp.Content.Headers)
+                    {
+                        _logger.LogDebug("{0} {1}: {2}", msg, header.Key, string.Join(", ", header.Value));
+                    }
 
-                    _logger.LogInformation($"{msg} Content:");
-                    _logger.LogInformation($"{msg} {string.Join("", result.Cast<char>())}");
-                    _logger.LogInformation($"{msg} Duration: {end - start}");
+                    if (resp.Content is StringContent || IsTextBasedContentType(resp.Headers) || IsTextBasedContentType(resp.Content.Headers))
+                    {
+                        start = DateTime.Now;
+                        var result = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        end = DateTime.Now;
+
+                        _logger.LogDebug("{0} Content:", msg);
+                        _logger.LogDebug("{0} {1}", msg, string.Join(string.Empty, result.Cast<char>()));
+                        _logger.LogDebug("{0} Duration: {1}", msg, end - start);
+                    }
                 }
+                _logger.LogDebug("{0} ==========End==========", msg);
             }
-            _logger.LogInformation($"{msg} ==========End==========");
 
             return response;
         }
