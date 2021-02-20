@@ -11,6 +11,9 @@ namespace FetchData
             SerializeMode = serializeMode;
         }
 
+        public ApiConfiguration()
+            : this(null) {}
+
         public string Host { get; set; }
         public int Timeout { get; set; }
         public SerializeNamingProperty SerializeMode { get; set; }
