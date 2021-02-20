@@ -36,9 +36,6 @@ namespace FetchData.Example
                 .AddApiServices(githubServiceConf)
                 .BuildServiceProvider();
 
-            serviceProvider.GetService<ILoggerFactory>()
-                .CreateLogger<Program>();
-
             Console.Write("Input GitHub username: ");
             var username = Console.ReadLine();
 
@@ -46,9 +43,18 @@ namespace FetchData.Example
             Console.WriteLine("Executing Fetch Data...");
 
             var githubService = serviceProvider.GetService<IApiService<IGitHubApi>>();
-            var initiatedResult = await (await githubService.Initiated.GetUser(username)).Content.ReadAsStringAsync();
-            var backgroundResult = await (await githubService.Background.GetUser(username)).Content.ReadAsStringAsync();
-            var speculativeResult = await (await githubService.Speculative.GetUser(username)).Content.ReadAsStringAsync();
+            var result = await githubService.Initiated.GetUser(username).ConfigureAwait(false);
+            await Task.Delay(100);
+
+            Console.WriteLine();
+            Console.WriteLine($"Name: {result.Name}");
+            Console.WriteLine($"Company: {result.Company}");
+            Console.WriteLine($"Twitter: {result.TwitterUsername}");
+            Console.WriteLine($"Blog: {result.Blog}");
+
+            Console.WriteLine();
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
     }
 }

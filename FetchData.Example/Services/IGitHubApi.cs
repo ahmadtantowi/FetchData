@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FetchData.Example.Models;
 using Refit;
 
 namespace FetchData.Example.Services
@@ -9,6 +10,6 @@ namespace FetchData.Example.Services
     public interface IGitHubApi : IGitHub
     {
         [Get("/users/{username}")]
-        Task<HttpResponseMessage> GetUser(string username);
+        Task<GitHubProfile> GetUser(string username);
     }
 }
