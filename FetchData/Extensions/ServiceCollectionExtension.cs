@@ -7,8 +7,7 @@ namespace FetchData.Extensions
 {
     public static class ServiceCollectionExtension
     {
-        public static IServiceCollection AddApiServices<T>(this IServiceCollection services, params T[] configs)
-            where T : ApiServiceConfiguration
+        public static IServiceCollection AddApiServices(this IServiceCollection services, params ApiServiceConfiguration[] configs)
         {
             foreach (var api in configs)
             {
