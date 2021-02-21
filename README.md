@@ -1,6 +1,8 @@
 # Fetch Data
 A helper to fetch API services using [Refit](https://github.com/reactiveui/refit) and [Fusillade](https://github.com/reactiveui/fusillade)
 
+[![NuGet](https://img.shields.io/nuget/v/FetchData.svg?label=NuGet)](https://www.nuget.org/packages/FetchData)
+
 ## Configuration
 Canfiguration can be done via `appsetting.json` file on inside code. You can configure host, timeout and serialize mode that represent `ApiConfiguration` object.
 
