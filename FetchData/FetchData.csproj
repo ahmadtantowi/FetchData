@@ -3,6 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
+    <PackOnBuild>true</PackOnBuild>
+    <PackageId>NetLicensingClient-csharp</PackageId>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Authors>Ahmad Tantowi</Authors>
+    <Copyright></Copyright>
+    <PackageIconUrl></PackageIconUrl>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <Owners>ahmadtantowi</Owners>
+    <PackageProjectUrl>https://github.com/ahmadtantowi/FetchData</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ahmadtantowi/FetchData</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/ahmadtantowi/FetchData/releases</PackageReleaseNotes>
+    <Summary>A helper to fetch API services using Refit and Fusillade </Summary>
   </PropertyGroup>
 
   <ItemGroup>
