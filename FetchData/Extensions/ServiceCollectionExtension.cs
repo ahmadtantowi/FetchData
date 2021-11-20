@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reflection;
 using FetchData.HttpTools;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,14 +13,9 @@ namespace FetchData.Extensions
             
             foreach (var api in configs)
             {
-                var allServices = Assembly
-                    .GetCallingAssembly()
-                    .GetTypes()
-                    .Where(a => api.Modules.Any(m => m.IsAssignableFrom(a)) && a.IsInterface);
-                
                 foreach (var module in api.Modules)
                 {
-                    var moduleServices = allServices.Where(m => module.IsAssignableFrom(m) && m != module);
+                    var moduleServices = module.Assembly.ExportedTypes.Where(m => module.IsAssignableFrom(m) && m != module);
 
                     foreach (var service in moduleServices)
                     {
