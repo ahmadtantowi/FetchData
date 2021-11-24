@@ -1,12 +1,12 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using FetchData.Example.Models;
+using FetchData.Sample.Shared.Models;
 using Refit;
 
-namespace FetchData.Example.Services
+namespace FetchData.Sample.Shared.Services
 {
-    [Headers("User-Agent: FetchData-Example")]
+    [Headers("User-Agent: FetchData-Sample")]
     public interface IGitHubApi : IGitHub
     {
         [Get("/users/{username}")]

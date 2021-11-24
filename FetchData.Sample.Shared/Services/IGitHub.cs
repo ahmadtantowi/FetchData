@@ -1,4 +1,4 @@
-namespace FetchData.Example.Services
+namespace FetchData.Sample.Shared.Services
 {
     public interface IGitHub
     {

@@ -5,14 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (console)",
+            "name": "Launch Console Sample",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "build-sample-console",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/FetchData.Example/bin/Debug/netcoreapp3.1/FetchData.Example.dll",
+            "program": "${workspaceFolder}/FetchData.Sample.Console/bin/Debug/net6.0/FetchData.Sample.Console.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/FetchData.Example",
+            "cwd": "${workspaceFolder}/FetchData.Sample.Console",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "integratedTerminal",
             "stopAtEntry": false

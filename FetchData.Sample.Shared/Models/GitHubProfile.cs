@@ -1,6 +1,6 @@
 using System;
 
-namespace FetchData.Example.Models
+namespace FetchData.Sample.Shared.Models
 {
     public class GitHubProfile
     {

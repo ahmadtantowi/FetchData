@@ -2,37 +2,37 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build-sample-console",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FetchData.Example/FetchData.Example.csproj",
+                "${workspaceFolder}/FetchData.Sample.Console/FetchData.Sample.Console.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish",
+            "label": "publish-sample-console",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/FetchData.Example/FetchData.Example.csproj",
+                "${workspaceFolder}/FetchData.Sample.Console/FetchData.Sample.Console.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "watch",
+            "label": "watch-sample-console",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/FetchData.Example/FetchData.Example.csproj",
+                "${workspaceFolder}/FetchData.Sample.Console/FetchData.Sample.Console.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
