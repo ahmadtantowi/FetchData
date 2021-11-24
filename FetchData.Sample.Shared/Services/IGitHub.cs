@@ -1,10 +1,9 @@
 using Refit;
 
-namespace FetchData.Sample.Shared.Services
+namespace FetchData.Sample.Shared.Services;
+
+[Headers("User-Agent: FetchData-Sample")]
+public interface IGitHub
 {
-    [Headers("User-Agent: FetchData-Sample")]
-    public interface IGitHub
-    {
-        
-    }
+
 }
