@@ -6,10 +6,12 @@ using Refit;
 
 namespace FetchData.Sample.Shared.Services
 {
-    [Headers("User-Agent: FetchData-Sample")]
-    public interface IGitHubApi : IGitHub
+    public interface IGitHubUserApi : IGitHub
     {
         [Get("/users/{username}")]
         Task<GitHubProfile> GetUser(string username);
+
+        [Get("/users/{username}/repos")]
+        Task<IEnumerable<GitHubRepository>> GetUserRepositories(string username);
     }
 }

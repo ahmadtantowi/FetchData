@@ -34,15 +34,21 @@ var username = Console.ReadLine();
 Console.WriteLine($"Get GitHub profile with username {username}");
 Console.WriteLine("Executing Fetch Data...");
 
-var githubService = serviceProvider.GetService<IApiService<IGitHubApi>>();
-var result = await githubService.Initiated.GetUser(username).ConfigureAwait(false);
+var githubUserApi = serviceProvider.GetService<IApiService<IGitHubUserApi>>();
+var resultUser = await githubUserApi.Initiated.GetUser(username).ConfigureAwait(false);
+var resultRepos = await githubUserApi.Initiated.GetUserRepositories(username).ConfigureAwait(false);
+
+// var githubSeachApi = serviceProvider.GetService<IApiService<IGitHubSearchApi>>();
+// var resultSearch = await githubSeachApi.Initiated.SearchUsers("ahmad");
+
 await Task.Delay(100);
 
 Console.WriteLine();
-Console.WriteLine($"Name: {result.Name}");
-Console.WriteLine($"Company: {result.Company}");
-Console.WriteLine($"Twitter: {result.TwitterUsername}");
-Console.WriteLine($"Blog: {result.Blog}");
+Console.WriteLine($"Name: {resultUser.Name}");
+Console.WriteLine($"Company: {resultUser.Company}");
+Console.WriteLine($"Twitter: {resultUser.TwitterUsername}");
+Console.WriteLine($"Blog: {resultUser.Blog}");
+Console.WriteLine($"Public Repos: {string.Join(", ", resultRepos.Select(x => $"{x.Name} ({x.Language})"))}");
 
 Console.WriteLine();
 Console.WriteLine("Press any key to exit...");
